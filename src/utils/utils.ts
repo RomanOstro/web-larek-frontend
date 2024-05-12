@@ -102,6 +102,16 @@ export function isBoolean(v: unknown): v is boolean {
     return typeof v === 'boolean';
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * Фабрика DOM-элементов в простейшей реализации
  * здесь не учтено много факторов
