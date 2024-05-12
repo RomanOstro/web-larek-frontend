@@ -264,35 +264,6 @@ interface IPage {
 `catalog` - отвечает за отображение списка карточек в каталоге.
 
 
-
-#### Класс CardData
-Интерфейс: 
-```
-interface ICardData {
-	catalog: IProductItem[];
-	basket: IProductItem[];
-	events: IEvents;
-	getCatalog(): IProductList;
-	setCatalog(data: IProductList):void;
-	totalPrice():number;
-	allOrderId():void;
-	clearBasket(): void;
-	
-}
-```
-
-Класс для работы с данными приложения. 
-
-Отвечает за данные корзины, каталога, покупателя. 
-
-Содержит методы:\
-`getCard` - получение карточки по id;\
-`totalPrice` - получение суммы всех товаров в корзине;\
-`allOrderId` - получение массива id заказанных товаров.\
-`addItem` - добавления карточки в массив корзины.\
-`clearBasket` - очистка массива корзины.
-
-
 ### Код модели данных
 
 #### Класс CardData 
