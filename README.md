@@ -57,6 +57,7 @@ export interface IProductItem {
 	title: string;
 	category: string;
 	price: number | null;
+	index?: number;
 }
 ```
 
@@ -72,6 +73,26 @@ export interface IOrderUser {
 }
 ```
 
+Объект данных пользователя при оформлении заказа в POST запросе
+```
+export interface IOrderPost {
+	payment: string;
+	address: string;
+	email: string;
+	phone: string;
+	total: number;
+	items: string[];
+}
+```
+
+Ответ с сервера после оформления заказа
+```
+export interface IOrderResponse {
+	id: string;
+	total: number;
+}
+```
+
 Список карточек
 ```
 export interface IProductList {
@@ -80,20 +101,6 @@ export interface IProductList {
 }
 ```
 
-Данные карточи для каталога товаров
-```
-export type ICatalogItem = Omit<IProductItem, 'description'>;
-```
-
-Данные для превью карточки
-```
-export type IPreviewItem = IProductItem;
-```
-
-Данные карточки для отображения в корзине
-```
-export type IBasketItem = Pick<IProductItem, 'id' | 'title' | 'price'>;
-```
 
 Данные ответа сервера - оформленного заказа 
 ```
@@ -103,12 +110,32 @@ export interface IOrderServer {
 }
 ```
 
+Типы для объекта с ошибками для валидации форм
+```
+export interface IOrderForm {
+	address?: string;
+	payment?: string;
+	phone?: string;
+	email?: string;
+}
+```
+
+Интерфейс для метода валидации форм
+```
+export interface IOrderValidate {
+	payment: string,
+	address: string
+	email: string
+	phone: string
+}
+```
+
 ## Архитектура приложения
 
 Код приложения разделен на слои согласно архитектуре MVP: 
 - слой представления, отвечает за отображение данных на странице,
 - слой данных, отвечает за хранение и изменение данных
-- презентер, отвечает за связь слоёв представления и данных.
+- презентер, отвечает за связь слоёв представления и данных. Роль презентера, выполняет фаил index.ts.
 
 ### Базовый код 
 
@@ -149,12 +176,18 @@ export interface IOrderServer {
 ### Код компонентов отображения
 
 #### Класс Basket
+```
+interface IBasket {
+	list: HTMLElement[];
+	total: string;
+}
+```
 
 Отвечает за отображение корзины. Наследуется от абстрактного класса Component. 
 В конструктор передаются контейнер в котором находится разметка корзины и брокер событий. 
 
 Содержит сеттеры:\
-`cards` -  для вывода карточек в разметку\
+`list` -  для вывода карточек в разметку\
 `total` - для вывода общей цены товаров находящихся в корзине
 
 #### Класс Card 
@@ -170,6 +203,15 @@ export interface IOrderServer {
 Содержит сеттер для:
 - Описания товара 
 
+Метод:\
+`toogleButtonText(value: boolean)` - для актуального отображения кнопки карточки.
+
+#### Класс CardBasket
+Отвечает за отображение карточки в корзине.
+Содержит сеттеры для:
+- установки индекса товара в корзине
+- названия товара в корзине
+
 
 #### Класс Form
 
@@ -183,7 +225,9 @@ interface IFormState {
 Класс для форм, в котором вешаются обработчики на контейнер, для отслеживания событий инпутов. 
 
 Содержит метод:\
-`oninputChange(field: keyof T, value:string)` - для инициализации собития изменения инпутов, аргументами передается поле в котором произошло событие и данные из этого поля. 
+`oninputChange(field: keyof T, value:string):void` - для инициализации собития изменения инпутов, аргументами передается поле в котором произошло событие и данные из этого поля.\
+`render(state: Partial<T> & IFormState):HTMLFormElement` - для рендера формы.\
+`clearForm():void` - для очистки формы.
 
 Содержит сеттеры для валидации формы и вывода текста ошибок. 
 
@@ -203,8 +247,6 @@ interface IContacts {
 `phone` - для установки значений в инпут phone.\
 `email` - для установки значений в инпут email.
 
-Метод:\
-`clearForm()` - используется для очистки полей формы
 
 #### Класс Order
 
@@ -244,7 +286,7 @@ interface IModal {
 Методы:\
 `open()` - для открытия модального окна.\
 `close()` - закрытия модального окна.\
-`render` - для установки значений в поля класса.
+`render` - для установки значений в поля класса и открытия модального окна.
 
 
 #### Класс Page 
@@ -261,25 +303,35 @@ interface IPage {
 
 Содержит сеттеры:\
 `counter` - устанавливает значение в поле счетчика корзины. Отображает количество товаров в корзине.\
-`catalog` - отвечает за отображение списка карточек в каталоге.
+`catalog` - отвечает за отображение списка карточек в каталоге.\
+`locked` - для блокировки страницы от прокрутки. 
 
 
 ### Код модели данных
 
 #### Класс CardData 
-Интервейс:\
+Интерфейс:
 
 ```
-export interface ICardData {
+interface ICardData {
 	catalog: IProductItem[];
 	basket: IProductItem[];
 	events: IEvents;
-	getCatalog(): IProductList;
-	setCatalog(data: IProductList):void;
-	totalPrice():number;
-	allOrderId():void;
+	order: IUserModel;
+	formErrors: IOrderForm;
+	setCatalog(cards: IProductItem[]): void;
+	getCatalog(): IProductItem[];
+	addToOrder(): void;
+	totalPrice(): number;
+	addItem(element: IProductItem): void | IProductItem;
+	deleteItem(id: string): void;
+	inBasket(id: string): boolean;
+	getBasket(): IProductItem[];
 	clearBasket(): void;
-	
+	clearOrder(): void;
+	setOrder(field: keyof IOrderValidate, value: string): void;
+	validateOrderForm(): void;
+	validateContactForm(): void;
 }
 ```
 
@@ -288,46 +340,37 @@ export interface ICardData {
 вывода массива с карточками на главную страницу. 
 
 Методы:\
-`getCard(cardId: string)` - Получить карточку по id.\
 `totalPrice()` - рассчитать общую сумму заказанных товаров товаров в корзине.\
-`allOrderId()` - создать массив с id заказанных товаров.\
 `addItem(element: IProductItem):void|IProductItem` - добавить товар в корзину.\
-`clearBasket()` - очистить корзину.
+`clearBasket()` - очистить корзину.\
+`setCatalog(cards: IProductItem[])` - установить каталог.\
+`getCatalog()` - олучить каталог.\
+`addToOrder()` - для присвоения id товаров и итоговой суммы заказа в объект заказа покупателя.\
+`deleteItem(id: string)` - удаление товара из корзины.\
+`inBasket(id: string)` - для проверки есть ли продукт в массиве корзины.\
+`getBasket()` - получить каталог корзины.\
+`clearOrder()`- очистить объект заказа для отправки на сервер.\
+`setOrder(field: keyof IOrderValidate, value: string)` - заполнение объекта пользователя для отправки на сервер.\
+`validateOrderForm()` - валидация формы с табсами.\
+`validateContactForm()` - валидация формы с даными покупателя.
 
 
 
-
-
-
-
-
-
-#### События
-`order:open` - при нажатии на кнопку "Оформить" в корзине.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Класс Component - базовый абстрактный класс, содержит набор необходимых методов для работы с отображением компонента. Класс использует дженерик - <T> который нужен для описания типов данных которые будут использоваться в компоненте.
-
-Конструктор класса (protected readonly container: HTMLElement) - принимает DOM элемент, в который будет вставлен компонент.
-
-Методы класса:
-toggleClass - переключает класс DOM элемента.
-setText - устанавливает текстовое содержимое в DOM элемент. -->
+### События
+`catalog:changed` - событие при выводе карточек в каталог.\
+`card:select` - при клике на карточку в каталоге и появления превью.\
+`basket:toggleItem` - при клике в превью на кнопку добавить в корзину и переключении кнопки на "Удалить из корзины" если карточка в корзине уже есть.\
+`basket:open` - при клике на кнопку корзины на главной странице, и открытии окнна с корзиной.\
+`basket:deleteItem` - при клике на кнопку удаления товара в корзине.\
+`basket:order` - при клике на кнопку далее, в корзине, если товары есть.\
+`orderErrors:change` - при валидации формы Order.\
+`contactErrors:change` - при валидации формы Contact.\
+`order.payment:change` - при добавлении способа оплаты, в объект заказа.\
+`order.address:change` - при добавлении адреса, в объект заказа.\
+`contacts.email:change` - при добавлении почты, в объект заказа.\
+`contacts.phone:change` - при добавлении телефона, в объект заказа.\
+`order:submit` - при клике на кнопку "Далее" в форме способа оплаты.\
+`contacts:submit` - при клике на кнопку "Оплатить" в форме ввода почты и телефона и отправке на сервер объекта заказа.\
+`order:complete` - при открытии окна успешной оплаты.\
+`order:finish` - для закрытия окна успешной оплаты.\
+`modal:close` - для разблокировки окна после закрытия формы. 

@@ -1,34 +1,34 @@
-import {IOrderPost, IOrderResponse, IProductItem} from "../../types/index"
-import { Api, ApiListResponse } from "../base/api";
+import {
+	IApi,
+	IOrderPost,
+	IOrderResponse,
+	IProductItem,
+	IProductList,
+} from '../../types/index';
 
-interface ILarekApi {
-  getCards(): Promise<IProductItem[]>,
-  postOrder(data:IOrderPost): Promise<IOrderResponse>,
+export class AppApi {
+	readonly cdn: string;
+	private _baseApi: IApi;
 
-}
+	constructor(cdn: string, baseApi: IApi) {
+		this._baseApi = baseApi;
+		this.cdn = cdn;
+	}
 
-export class LarekApi extends Api implements ILarekApi {
-  readonly cdn: string;
+	getCards(): Promise<IProductItem[]> {
+		return this._baseApi
+			.get<IProductList>(`/product`)
+			.then((data: IProductList) => {
+				return data.items.map((item) => ({
+					...item,
+					image: this.cdn + item.image,
+				}));
+			});
+	}
 
-  constructor(cdn: string, baseUrl:string, options?:RequestInit){
-    super(baseUrl, options)
-    this.cdn = cdn;
-  }
-
-  getCards(): Promise<IProductItem[]> {
-    return this.get(`/product`).then((data:ApiListResponse<IProductItem>) => {
-      return data.items.map((item) => ({
-          ...item,
-          image: this.cdn + item.image
-      }))
-    }
-  );
-  }
-
-  postOrder(data:IOrderPost):Promise<IOrderResponse> {
-    return this.post(`/order`, data)
-    .then((data:IOrderResponse) => data)
-  }
-
-
+	postOrder(data: IOrderPost): Promise<IOrderResponse> {
+		return this._baseApi
+			.post<IOrderResponse>(`/order`, data, 'POST')
+			.then((data: IOrderResponse) => data);
+	}
 }

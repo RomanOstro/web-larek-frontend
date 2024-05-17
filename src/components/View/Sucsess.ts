@@ -1,28 +1,33 @@
-import { ensureElement } from "../../utils/utils";
-import { Component } from "../base/Component";
-import { IEvents } from "../base/events";
+import { ensureElement } from '../../utils/utils';
+import { Component } from '../base/Component';
+import { IEvents } from '../base/events';
 
 interface ISucsess {
-  total: number;
+	total: number;
 }
 
 export class Sucsess extends Component<ISucsess> {
-protected _closeButton: HTMLButtonElement;
-protected _description: HTMLElement;
+	protected _closeButton: HTMLButtonElement;
+	protected _description: HTMLElement;
 
-  constructor(container: HTMLElement, event: IEvents){
-    super(container)
+	constructor(container: HTMLElement, event: IEvents) {
+		super(container);
 
-    this._description = ensureElement<HTMLElement>(`order-success__description`, this.container)
-    this._closeButton = ensureElement<HTMLButtonElement>(`.order-success__close`, this.container);
+		this._description = ensureElement<HTMLElement>(
+			`.order-success__description`,
+			this.container
+		);
+		this._closeButton = ensureElement<HTMLButtonElement>(
+			`.order-success__close`,
+			this.container
+		);
 
-    // установить обработчик на кнопку и передать в конструктор
+		this._closeButton.addEventListener(`click`, () => {
+			event.emit(`order:finish`);
+		});
+	}
 
-  }
-
-  set total(value:number){
-    this.setText(this._description, `Списано ${value} синапсов`)
-  }
-
+	set total(value: number) {
+		this.setText(this._description, `Списано ${value} синапсов`);
+	}
 }
-

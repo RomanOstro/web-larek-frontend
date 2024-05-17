@@ -4,7 +4,7 @@ import { IEvents } from '../base/events';
 
 interface IBasket {
 	list: HTMLElement[];
-	total: string;
+	total: number;
 }
 
 export class Basket extends Component<IBasket> {
@@ -15,17 +15,20 @@ export class Basket extends Component<IBasket> {
 	constructor(container: HTMLElement, protected event: IEvents) {
 		super(container);
 		this._list = ensureElement<HTMLElement>('.basket__list', this.container);
-		this._total = ensureElement<HTMLElement>('.basket__price');
-		this._button = ensureElement<HTMLButtonElement>('.basket__action');
+		this._total = ensureElement<HTMLElement>('.basket__price', this.container);
+		this._button = ensureElement<HTMLButtonElement>(
+			'.basket__button',
+			this.container
+		);
 
 		this._button.addEventListener('click', () => {
-			event.emit('order:open');
+			event.emit('basket:order');
 		});
 
 		this.list = [];
 	}
 
-  // Установка карточек в ul корзины
+	// Установка карточек в ul корзины
 	set list(items: HTMLElement[]) {
 		if (items.length) {
 			this._list.replaceChildren(...items);
@@ -37,11 +40,11 @@ export class Basket extends Component<IBasket> {
 			);
 		}
 		// Если товары в корзине есть, кнопка активна, иначе - нет
-		this._button.disabled = items.length? false : true;
+		this._button.disabled = items.length ? false : true;
 	}
 
-  // Общая сумма товаров
-  set total(value:number) {
-    this.setText(this._total, String(value))
-  }
+	// Общая сумма товаров
+	set total(value: number) {
+		this.setText(this._total, String(value) + ` синапсов`);
+	}
 }
