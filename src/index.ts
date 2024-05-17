@@ -10,17 +10,16 @@ import { Api } from './components/base/api';
 import './scss/styles.scss';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { API_URL, CDN_URL } from './utils/constants';
-import { AppApi } from './components/View/AppApi';
+import { AppApi } from './components/AppApi';
 import { Page } from './components/View/Page';
 import { Modal } from './components/View/Modal';
 import { CardData } from './components/CardData';
 import { Card, CardBasket, CardPreview } from './components/View/Card';
 import { Basket } from './components/View/Basket';
 import { Order } from './components/View/Order';
-import { Form } from './components/View/Form';
 import { Contacts } from './components/View/Contacts';
 import { Sucsess } from './components/View/Sucsess';
-import { Model } from './components/base/Model';
+
 
 // Шаблоны
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');

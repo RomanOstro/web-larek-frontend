@@ -4,7 +4,7 @@ import {
 	IOrderResponse,
 	IProductItem,
 	IProductList,
-} from '../../types/index';
+} from '../types/index';
 
 export class AppApi {
 	readonly cdn: string;
