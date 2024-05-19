@@ -6,7 +6,7 @@ import {
 	IOrderResponse,
 } from './types';
 import { EventEmitter } from './components/base/events';
-import { Api } from './components/base/api';
+import { Api } from './components/base/Api';
 import './scss/styles.scss';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { API_URL, CDN_URL } from './utils/constants';
@@ -14,7 +14,7 @@ import { AppApi } from './components/AppApi';
 import { Page } from './components/View/Page';
 import { Modal } from './components/View/Modal';
 import { CardData } from './components/CardData';
-import { Card, CardBasket, CardPreview } from './components/View/Card';
+import { Card} from './components/View/Card';
 import { Basket } from './components/View/Basket';
 import { Order } from './components/View/Order';
 import { Contacts } from './components/View/Contacts';
@@ -66,7 +66,7 @@ events.on(`catalog:changed`, () => {
 
 // Событие при клике на карточку в каталоге, для появления превью
 events.on(`card:select`, (product: IProductItem) => {
-	const cardPreview = new CardPreview(
+	const cardPreview = new Card(
 		cloneTemplate(cardPreviewTemplate),
 		`card`,
 		() => {
@@ -92,7 +92,7 @@ events.on(`basket:toggleItem`, (product: IProductItem) => {
 //  Рендер карточек корзины и открытие корзины
 events.on(`basket:open`, () => {
 	const items = appModel.getBasket().map((card, index) => {
-		const itemInBasket = new CardBasket(
+		const itemInBasket = new Card(
 			cloneTemplate(cardBasketTemplate),
 			`card`,
 			() => {
@@ -116,7 +116,6 @@ events.on(`basket:deleteItem`, (product: IProductItem) => {
 
 // Открытие первой формы заказа
 events.on('basket:order', () => {
-	appModel.addToOrder();
 	page.locked = true;
 	modal.render({
 		content: ordersForm.render({
@@ -187,7 +186,10 @@ events.on('order:submit', () => {
 
 events.on('contacts:submit', () => {
 	appApi
-		.postOrder(appModel.order)
+		.postOrder({...appModel.order,
+			total: appModel.total,
+			items: appModel.items
+		})
 		.then((res) => {
 			events.emit(`order:complete`, res);
 			appModel.clearBasket();
@@ -200,6 +202,8 @@ events.on('contacts:submit', () => {
 			console.log(error);
 		});
 });
+
+
 
 events.on(`order:complete`, (res: IOrderResponse) => {
 	const sucsess = new Sucsess(cloneTemplate(successTemplate), events);

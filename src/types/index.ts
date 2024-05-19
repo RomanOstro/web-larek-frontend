@@ -88,8 +88,8 @@ export interface IUserModel {
 	address: string;
 	email: string;
 	phone: string;
-	total: number;
-	items: string[];
+	// total: number;
+	// items: string[];
 }
 
 // Тип методов запросов на сервер

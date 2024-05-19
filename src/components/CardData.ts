@@ -19,10 +19,19 @@ export class CardData extends Model<ICardData> {
 		address: ``,
 		email: ``,
 		phone: ``,
-		total: 0,
-		items: [],
+		// total: 0,
+		// items: [],
 	};
+// ---------------------------
+get items (){
+	return this.basket.map((item) => item.id);
+}
 
+get total() {
+	return this.totalPrice();
+}
+
+// ---------------------------
 	// Объект с ошибками, для валидации форм
 	formErrors: IOrderForm = {};
 
@@ -43,10 +52,10 @@ export class CardData extends Model<ICardData> {
 	}
 
 	// Метод для присвоения id товаров и итоговой суммы заказа в объект заказа покупателя
-	addToOrder() {
-		this.order.items = this.basket.map((item) => item.id);
-		this.order.total = this.totalPrice();
-	}
+	// addToOrder() {
+	// 	this.order.items = this.basket.map((item) => item.id);
+	// 	this.order.total = this.totalPrice();
+	// }
 
 	// Общая сумма товаров в корзине
 	totalPrice() {
@@ -90,8 +99,8 @@ export class CardData extends Model<ICardData> {
 			address: ``,
 			email: ``,
 			phone: ``,
-			total: 0,
-			items: [],
+			// total: 0,
+			// items: [],
 		};
 	}
 
