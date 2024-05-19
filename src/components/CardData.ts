@@ -11,7 +11,6 @@ import { Model } from './base/Model';
 export class CardData extends Model<ICardData> {
 	protected catalog: IProductItem[] = [];
 	protected basket: IProductItem[] = [];
-	// protected _preview: boolean;
 	protected event: IEvents;
 
 	// Поле заказа
