@@ -2,9 +2,13 @@ import { ensureElement } from '../../utils/utils';
 import { Component } from '../base/Component';
 import { IEvents } from '../base/events';
 
-interface IFormState {
+interface IFormState { //(Добавить в документ)
 	valid: boolean;
 	errors: string[];
+	address: string;
+	payment: string;
+	phone: string;
+	email: string;
 }
 
 export class Form<T> extends Component<IFormState> {
@@ -46,13 +50,6 @@ export class Form<T> extends Component<IFormState> {
 			field,
 			value,
 		});
-	}
-
-	render(state: Partial<T> & IFormState) {
-		const { valid, errors, ...inputs } = state;
-		super.render({ valid, errors });
-		Object.assign(this, inputs);
-		return this.container;
 	}
 
 	clearForm() {

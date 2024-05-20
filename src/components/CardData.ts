@@ -18,11 +18,9 @@ export class CardData extends Model<ICardData> {
 		payment: ``,
 		address: ``,
 		email: ``,
-		phone: ``,
-		// total: 0,
-		// items: [],
+		phone: ``
 	};
-// ---------------------------
+
 get items (){
 	return this.basket.map((item) => item.id);
 }
@@ -31,7 +29,7 @@ get total() {
 	return this.totalPrice();
 }
 
-// ---------------------------
+
 	// Объект с ошибками, для валидации форм
 	formErrors: IOrderForm = {};
 
@@ -51,11 +49,6 @@ get total() {
 		return this.catalog;
 	}
 
-	// Метод для присвоения id товаров и итоговой суммы заказа в объект заказа покупателя
-	// addToOrder() {
-	// 	this.order.items = this.basket.map((item) => item.id);
-	// 	this.order.total = this.totalPrice();
-	// }
 
 	// Общая сумма товаров в корзине
 	totalPrice() {
@@ -69,13 +62,14 @@ get total() {
 		if (this.basket.find((card) => card.id === element.id)) {
 			return;
 		}
-
+		this.emitChanges(`basket:changed`, {cards: this.basket});
 		this.basket.push(element);
 	}
 
 	// Удалить товар из корзины
 	deleteItem(id: string) {
 		this.basket = this.basket.filter((card) => card.id !== id);
+		this.emitChanges(`basket:changed`, {cards: this.basket});
 	}
 
 	// Проверка, есть ли продукт в массиве корзины
@@ -98,9 +92,7 @@ get total() {
 			payment: ``,
 			address: ``,
 			email: ``,
-			phone: ``,
-			// total: 0,
-			// items: [],
+			phone: ``
 		};
 	}
 

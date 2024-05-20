@@ -1,7 +1,7 @@
-import { IProductItem } from '../../types';
+import { IProductItem, cardCategoryType } from '../../types';
 import { Component } from '../base/Component';
 import { ensureElement } from '../../utils/utils';
-
+import { cardCategory } from '../../utils/constants';
 
 export class Card extends Component<IProductItem> {
 	cardElement: HTMLElement;
@@ -11,10 +11,10 @@ export class Card extends Component<IProductItem> {
 	protected _cardPrice: HTMLElement;
 	protected _button?: HTMLButtonElement;
 	protected _id: string;
-	protected _description?: HTMLElement;  
+	protected _description?: HTMLElement;
 	protected _index: HTMLElement;
 	protected _deleteButton: HTMLButtonElement;
-	
+
 	constructor(
 		container: HTMLElement,
 		blockName: string,
@@ -32,10 +32,8 @@ export class Card extends Component<IProductItem> {
 			`.${blockName}__price`,
 			this.container
 		);
-		this._description = this.container.querySelector(
-			`.${blockName}__text`
-		);
-		this._index =  this.container.querySelector(`.basket__item-index`);
+		this._description = this.container.querySelector(`.${blockName}__text`);
+		this._index = this.container.querySelector(`.basket__item-index`);
 
 		this._button = this.container.querySelector(`.${blockName}__button`);
 
@@ -45,7 +43,7 @@ export class Card extends Component<IProductItem> {
 			this.container.addEventListener(`click`, clickCardHandler);
 		}
 
-		this._deleteButton = container.querySelector(`.basket__item-delete`); 
+		this._deleteButton = container.querySelector(`.basket__item-delete`);
 		if (this._deleteButton) {
 			this._deleteButton.addEventListener(`click`, (evt) => {
 				clickCardHandler(evt);
@@ -69,12 +67,12 @@ export class Card extends Component<IProductItem> {
 		return this._cardTitle.textContent || ``;
 	}
 
-	set category(value: string) {
+	set category(value: cardCategoryType) {
 		this.setText(this._category, value);
 	}
 
-	get category() {
-		return this._category.textContent || ``;
+	get category(): cardCategoryType {
+		return this._category.textContent as cardCategoryType;
 	}
 
 	set image(value: string) {
@@ -107,7 +105,7 @@ export class Card extends Component<IProductItem> {
 		}
 	}
 
-	set index(value: number) {                     
+	set index(value: number) {
 		this.setText(this._index, value);
 	}
 
@@ -116,6 +114,11 @@ export class Card extends Component<IProductItem> {
 			this.button = `Убрать из корзины`;
 		} else this.button = `В корзину`;
 	}
+
+	// Устанавливаем класс карточке, в зависимости от текст контента категории
+	categoryColor(value: cardCategoryType) {
+		return this._category.classList.add(
+			`card__category_${cardCategory[value]}`
+		);
+	}
 }
-
-

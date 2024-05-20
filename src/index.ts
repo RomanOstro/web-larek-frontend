@@ -14,12 +14,11 @@ import { AppApi } from './components/AppApi';
 import { Page } from './components/View/Page';
 import { Modal } from './components/View/Modal';
 import { CardData } from './components/CardData';
-import { Card} from './components/View/Card';
+import { Card } from './components/View/Card';
 import { Basket } from './components/View/Basket';
 import { Order } from './components/View/Order';
 import { Contacts } from './components/View/Contacts';
 import { Sucsess } from './components/View/Sucsess';
-
 
 // Шаблоны
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
@@ -48,6 +47,7 @@ const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const ordersForm = new Order(cloneTemplate(orderTemplate), events);
 const contactsForm = new Contacts(cloneTemplate(contactsTemplate), events);
+const sucsess = new Sucsess(cloneTemplate(successTemplate), events);
 
 // Получаем карточки с сервера
 
@@ -59,6 +59,7 @@ events.on(`catalog:changed`, () => {
 		const card = new Card(cloneTemplate(cardCatalogTemplate), `card`, () => {
 			events.emit(`card:select`, product);
 		});
+		card.categoryColor(product.category);
 		return card.render(product);
 	});
 	page.catalog = cards;
@@ -74,8 +75,8 @@ events.on(`card:select`, (product: IProductItem) => {
 			cardPreview.toogleButtonText(appModel.inBasket(product.id));
 		}
 	);
+	cardPreview.categoryColor(product.category);
 	cardPreview.toogleButtonText(appModel.inBasket(product.id));
-	page.locked = true;
 	modal.render({ content: cardPreview.render(product) });
 });
 
@@ -101,7 +102,6 @@ events.on(`basket:open`, () => {
 		);
 		return itemInBasket.render({ ...card, index: index + 1 });
 	});
-	page.locked = true;
 	modal.render({
 		content: basket.render({ list: items, total: appModel.totalPrice() }),
 	});
@@ -110,19 +110,30 @@ events.on(`basket:open`, () => {
 // Удаление карточки по кнопке в корзине
 events.on(`basket:deleteItem`, (product: IProductItem) => {
 	appModel.deleteItem(product.id);
+});
+
+// Корзина изменилась
+events.on(`basket:changed`, () => {
+	const items = appModel.getBasket().map((card, index) => {
+		const itemInBasket = new Card(
+			cloneTemplate(cardBasketTemplate),
+			`card`,
+			() => {
+				events.emit(`basket:deleteItem`, card);
+			}
+		);
+		return itemInBasket.render({ ...card, index: index + 1 });
+	});
+	basket.render({ list: items, total: appModel.totalPrice() });
 	page.counter = appModel.totalItem;
-	events.emit(`basket:open`);
 });
 
 // Открытие первой формы заказа
 events.on('basket:order', () => {
-	page.locked = true;
 	modal.render({
 		content: ordersForm.render({
 			valid: false,
 			errors: [],
-			address: ``,
-			payment: ``,
 		}),
 	});
 });
@@ -173,11 +184,8 @@ events.on(
 
 //  Открываем форму с контактами
 events.on('order:submit', () => {
-	page.locked = true;
 	modal.render({
 		content: contactsForm.render({
-			phone: '',
-			email: '',
 			valid: false,
 			errors: [],
 		}),
@@ -186,9 +194,10 @@ events.on('order:submit', () => {
 
 events.on('contacts:submit', () => {
 	appApi
-		.postOrder({...appModel.order,
+		.postOrder({
+			...appModel.order,
 			total: appModel.total,
-			items: appModel.items
+			items: appModel.items,
 		})
 		.then((res) => {
 			events.emit(`order:complete`, res);
@@ -203,12 +212,12 @@ events.on('contacts:submit', () => {
 		});
 });
 
-
-
 events.on(`order:complete`, (res: IOrderResponse) => {
-	const sucsess = new Sucsess(cloneTemplate(successTemplate), events);
-	page.locked = true;
 	modal.render({ content: sucsess.render({ total: res.total }) });
+});
+
+events.on(`modal:open`, () => {
+	page.locked = true;
 });
 
 events.on(`order:finish`, () => {

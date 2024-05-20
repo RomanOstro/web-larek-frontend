@@ -1,11 +1,14 @@
 import { IEvents } from '../components/base/events';
+
+// Тип категорий карточек
+export type cardCategoryType = "софт-скил"|"другое"|"дополнительное"|"кнопка"|"хард-скил"
 // Объект данных карточки
 export interface IProductItem {
 	id: string;
 	description: string;
 	image: string;
 	title: string;
-	category: string;
+	category: cardCategoryType;
 	price: number | null;
 	index?: number;
 }
@@ -88,8 +91,6 @@ export interface IUserModel {
 	address: string;
 	email: string;
 	phone: string;
-	// total: number;
-	// items: string[];
 }
 
 // Тип методов запросов на сервер
