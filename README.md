@@ -208,15 +208,18 @@ interface IBasket {
 
 Методы:\
 `toogleButtonText(value: boolean)` - для актуального отображения кнопки карточки.\
-`categoryColor(value: cardCategoryType)` - для установки категории товара, нужного цвета. 
 
 #### Класс Form
 
 Интерфейс:
 ```
-interface IFormState {
-  valid: boolean;
-  errors: string[];
+interface IFormState { 
+	valid: boolean;
+	errors: string[];
+	address: string;
+	payment: string;
+	phone: string;
+	email: string;
 }
 ```
 Класс для форм, в котором вешаются обработчики на контейнер, для отслеживания событий инпутов. 

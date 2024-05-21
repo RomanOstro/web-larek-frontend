@@ -66,9 +66,12 @@ export class Card extends Component<IProductItem> {
 	get title() {
 		return this._cardTitle.textContent || ``;
 	}
-
+// Установка текст в категорию товара, и цвета кнопки(с помощью константы в utils/constants)
 	set category(value: cardCategoryType) {
 		this.setText(this._category, value);
+		this._category.classList.add(
+			`card__category_${cardCategory[value]}`
+		);
 	}
 
 	get category(): cardCategoryType {
@@ -115,10 +118,4 @@ export class Card extends Component<IProductItem> {
 		} else this.button = `В корзину`;
 	}
 
-	// Устанавливаем класс карточке, в зависимости от текст контента категории
-	categoryColor(value: cardCategoryType) {
-		return this._category.classList.add(
-			`card__category_${cardCategory[value]}`
-		);
-	}
 }

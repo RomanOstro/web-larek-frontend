@@ -51,7 +51,9 @@ const sucsess = new Sucsess(cloneTemplate(successTemplate), events);
 
 // Получаем карточки с сервера
 
-appApi.getCards().then((cards) => appModel.setCatalog(cards));
+appApi.getCards()
+.then((cards) => appModel.setCatalog(cards))
+.catch((error) => console.log(error));
 
 // Выводим карточки на страничку в каталог
 events.on(`catalog:changed`, () => {
@@ -59,7 +61,6 @@ events.on(`catalog:changed`, () => {
 		const card = new Card(cloneTemplate(cardCatalogTemplate), `card`, () => {
 			events.emit(`card:select`, product);
 		});
-		card.categoryColor(product.category);
 		return card.render(product);
 	});
 	page.catalog = cards;
@@ -75,7 +76,6 @@ events.on(`card:select`, (product: IProductItem) => {
 			cardPreview.toogleButtonText(appModel.inBasket(product.id));
 		}
 	);
-	cardPreview.categoryColor(product.category);
 	cardPreview.toogleButtonText(appModel.inBasket(product.id));
 	modal.render({ content: cardPreview.render(product) });
 });
@@ -85,7 +85,7 @@ events.on(`basket:toggleItem`, (product: IProductItem) => {
 	if (!appModel.inBasket(product.id)) {
 		appModel.addItem(product);
 	} else {
-		appModel.deleteItem(product.id);
+		events.emit(`basket:deleteItem`, product)
 	}
 	page.counter = appModel.totalItem;
 });
@@ -100,17 +100,24 @@ events.on(`basket:open`, () => {
 				events.emit(`basket:deleteItem`, card);
 			}
 		);
-		return itemInBasket.render({ ...card, index: index + 1 });
+		return itemInBasket.render({
+			title: card.title,
+			price: card.price,
+			index: index + 1,
+			id: card.id
+		});
 	});
 	modal.render({
 		content: basket.render({ list: items, total: appModel.totalPrice() }),
 	});
 });
 
+
 // Удаление карточки по кнопке в корзине
 events.on(`basket:deleteItem`, (product: IProductItem) => {
 	appModel.deleteItem(product.id);
 });
+
 
 // Корзина изменилась
 events.on(`basket:changed`, () => {
@@ -122,7 +129,12 @@ events.on(`basket:changed`, () => {
 				events.emit(`basket:deleteItem`, card);
 			}
 		);
-		return itemInBasket.render({ ...card, index: index + 1 });
+		return itemInBasket.render({
+			title: card.title,
+			price: card.price,
+			index: index + 1,
+			id: card.id
+		});
 	});
 	basket.render({ list: items, total: appModel.totalPrice() });
 	page.counter = appModel.totalItem;
